@@ -8,7 +8,7 @@ import Fuse from "fuse.js";
 import { usePersistentState } from "raycast-toolkit";
 
 const { primaryAction, unicodeVersion, shortCodes } = getPreferenceValues<{
-  primaryAction: "paste" | "copy";
+  primaryAction: "paste" | "copy" | "both";
   unicodeVersion: UnicodeVersion;
   shortCodes: boolean;
 }>();
@@ -124,6 +124,17 @@ export default function Main(): ReactElement {
                     }}
                   />
                 );
+                const both = (
+                  <Action.CopyToClipboard
+                    content={emoji.emoji}
+                    onCopy={() => {
+                      addToRecentlyUsed(emoji);
+                    }}
+                  />
+                  <Action.Paste
+                    content={emoji.emoji}
+                  />
+                );
                 return (
                   <List.Item
                     key={emoji.description}
@@ -134,17 +145,29 @@ export default function Main(): ReactElement {
                     actions={
                       <ActionPanel>
                         <ActionPanel.Section>
-                          {primaryAction === "paste" ? (
-                            <>
-                              {paste}
-                              {copy}
-                            </>
-                          ) : (
-                            <>
-                              {copy}
-                              {paste}
-                            </>
-                          )}
+                          {switch(primaryAction) {
+                            case "paste":
+                              <>
+                                {paste}
+                                {copy}
+                                {both}
+                              </>
+                              break;
+                            case "copy":
+                              <>
+                                {copy}
+                                {paste}
+                                {both}
+                              </>
+                              break;
+                            case "both":
+                              <>
+                                {both}
+                                {paste}
+                                {copy}
+                              </>
+                              break;
+                          }}
                           {shortCodes && emoji.shortCode && (
                             <Action.CopyToClipboard
                               title="Copy Shortcode"
